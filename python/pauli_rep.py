@@ -1,5 +1,9 @@
 import numpy as np
 
+from sparse import ground
+from variance import variance_local
+from var_optimise import optimal_beta
+
 
 class PauliRep():
 
@@ -62,13 +66,18 @@ class PauliRep():
             dic[i] = [1/3, 1/3, 1/3]
         return dic
 
-    def local_dists_pnorm(self, norm):
-        assert norm in [1, 2, 'infinity']
+    def local_dists_optimal(self):
+        """Find optimal probabilities beta_{i,P} and return as dictionary
+        attn: qiskit ordering"""
+        return optimal_beta(self)
 
+    def local_dists_pnorm(self, norm):
         '''
         Return dictionary (over all qubits) of normalized p_norms (over all three paulis)
         attn: qiskit ordering
         '''
+        assert norm in [1, 2, 'infinity']
+
         dic = {}
         for qubit in range(self.num_qubits):
             pnorm_sums = [0.0, 0.0, 0.0]  # [X, Y, Z]-sums
@@ -80,7 +89,13 @@ class PauliRep():
         return dic
 
     def energy_tf(self, energy):
-        '''
-        return energy of trace-free hamiltonian
-        '''
         return energy - self.iden_coef
+
+    def ground(self):
+        return ground(self)
+
+    def variance_local(self, energy, state, β):
+        return variance_local(self, energy, state, β)
+
+    def variance_ell_1(self, energy):
+        return (self.one_norm_tf)**2 - (self.energy_tf(energy))**2

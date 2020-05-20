@@ -73,26 +73,3 @@ def variance_local(pauli_rep, energy, state, β):
     energy_tf = pauli_rep.energy_tf(energy)
     var -= energy_tf**2
     return var
-
-
-def variance(pauli_rep, energy, state, algo, p_norm=None):
-    """
-    Calculate variance (precisely) for ground state associated with Hamiltonian
-    """
-
-    assert algo in ["ell_1", "uniform", "biased"]
-    if algo == "biased":
-        assert p_norm in [1, 2, "infinity"]
-
-    elif algo == "ell_1":
-        energy_tf = pauli_rep.energy_tf(energy)
-        return (pauli_rep.one_norm_tf)**2 - energy_tf**2
-
-    elif algo == "uniform":
-        β = pauli_rep.local_dists_uniform()
-        return variance_local(pauli_rep, energy, state, β)
-
-    else:
-        # algo == "biased"
-        β = pauli_rep.local_dists_pnorm(p_norm)
-        return variance_local(pauli_rep, energy, state, β)

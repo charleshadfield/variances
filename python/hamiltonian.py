@@ -75,16 +75,17 @@ class HamiltonianH2():
         return dic
 
 
-class HamiltonianW():
+class HamiltonianWA():
 
-    def __init__(self, encoding):
+    def __init__(self, molecule, encoding):
+        self.molecule = molecule
         self.encoding = encoding
         self.path = self.path()
         self.pauli_rep = PauliRep(self.pauli_rep_dic())
         self.num_qubits = self.pauli_rep.num_qubits
 
     def path(self):
-        path = 'Hamiltonians/water/{}.txt'.format(self.encoding)
+        path = 'Hamiltonians/{0}/{1}.txt'.format(self.molecule, self.encoding)
         return path
 
     def pauli_rep_dic(self):

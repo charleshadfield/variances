@@ -1,10 +1,10 @@
 import itertools
-import numpy as np
+# import numpy as np
 
 from pauli_rep import PauliRep
 
-molecules = ['BeH2', 'LiH']
-distances = [round(k, 1) for k in np.arange(start=0.5, stop=5.1, step=0.1)]
+# molecules = ['BeH2', 'LiH']
+# distances = [round(k, 1) for k in np.arange(start=0.5, stop=5.1, step=0.1)]
 
 
 class HamiltonianToy():
@@ -18,7 +18,7 @@ class HamiltonianToy():
         self.num_qubits = self.pauli_rep.num_qubits
 
 
-class Hamiltonian():
+class HamiltonianLB():
 
     def __init__(self, molecule, distance):
         self.molecule = molecule

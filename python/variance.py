@@ -1,6 +1,7 @@
 import numpy as np
 
-from sparse import to_matrix
+# from sparse import to_matrix
+from sparse import pauli_kron_state_product
 
 
 def f_individual(q, r, βi):
@@ -65,8 +66,13 @@ def variance_local(pauli_rep, energy, state, β):
                 continue
             # else, need to calculate < state | PQ | state >
             QR = pauli_multiply_string(Q, R)
-            QRmat = to_matrix(QR)
-            tr_rho_QR = np.dot(np.conjugate(state), QRmat * state).real
+
+            # old way:
+            # QRmat = to_matrix(QR)
+            # tr_rho_QR = np.dot(np.conjugate(state), QRmat * state).real
+
+            # new way:
+            tr_rho_QR = np.dot(np.conjugate(state), pauli_kron_state_product(QR, state)).real
 
             var += f * alphaQ * alphaR * tr_rho_QR
 

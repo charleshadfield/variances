@@ -1,5 +1,5 @@
 from pauli_rep import PauliRep
-from ham_read_file import read_encoding_return_dict
+from ham_read_file import read_encoding_return_dict, read_ldf_return_dict
 
 
 class Hamiltonian():
@@ -17,6 +17,10 @@ class Hamiltonian():
 
     def _pauli_rep_dic(self):
         return read_encoding_return_dict(self.path)
+
+    def ldf(self):
+        path = 'Hamiltonians/{0}/{1}_grouped.txt'.format(self.folder, self.encoding)
+        return read_ldf_return_dict(path, self.num_qubits)
 
 
 class HamiltonianToy():

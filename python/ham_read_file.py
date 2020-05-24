@@ -31,3 +31,30 @@ def read_encoding_return_dict(file):
         return dic
 
     pass
+
+
+def read_ldf_return_dict(file, num_qubits):
+    """
+    Build dictionary of PauliRep styled dictionaries over groupings obtained from ldf algorithm.
+    LDF algo has already been applied, and file is in same folder as encoding.
+    WARNING: idenity string is excluded from this dictionary.
+    """
+    groups = {}
+    group_number = -1
+    with open(file, 'r') as f:
+        for line_number, line in enumerate(f):
+            if line[0:4] == '0.0,':
+                group_number += 1
+                groups[group_number] = {}
+            else:
+                # line is a string 'coefficient,pauli'
+                # enter this coefficient into PauliRep style dictionary
+                index_comma = line.index(',')
+                coefficient = float(line[:index_comma])
+                pauli = line[index_comma+1:-1]
+                # do not include identity string
+                if pauli == 'I'*num_qubits:
+                    pass
+                else:
+                    groups[group_number][pauli] = coefficient
+    return groups

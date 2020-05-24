@@ -9,6 +9,7 @@ from functools import reduce
 
 # ==== HELPER FUNCTIONS ==== #
 
+
 def unfold(tens, mode, dims):
     """
     Unfolds tensor into matrix.
@@ -51,6 +52,7 @@ def refold(vec, mode, dims):
         return np.moveaxis(tens, 0, mode)
 
 # ==== KRON-VEC PRODUCT COMPUTATIONS ==== #
+
 
 def kron_vec_prod(As, v):
     """

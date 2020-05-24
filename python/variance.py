@@ -79,3 +79,38 @@ def variance_local(pauli_rep, energy, state, β):
     energy_tf = pauli_rep.energy_tf(energy)
     var -= energy_tf**2
     return var
+
+# Largest Degree first
+
+
+def variance_ldf_single_group(group, state):
+    var = 0.0
+    for Q, alphaQ in group.items():
+        for R, alphaR in group.items():
+            QR = pauli_multiply_string(Q, R)
+            tr_rho_QR = np.dot(np.conjugate(state), pauli_kron_state_product(QR, state)).real
+
+            var += alphaQ * alphaR * tr_rho_QR
+    return var
+
+
+def variance_ldf(ldf, state, kappa, energy_tf):
+    assert len(ldf.keys()) == len(kappa)
+    var = 0.0
+    for group_number, group in ldf.items():
+        var += (1/kappa[group_number]) * variance_ldf_single_group(group, state)
+
+    var -= energy_tf**2
+
+    return var
+
+
+def kappa_uniform(ldf):
+    return [1/len(ldf.keys())]*len(ldf.keys())
+
+
+def kappa_1norm(ldf):
+    group_1norms = [np.linalg.norm(list(ldf[group].values()), ord=1)
+                    for group in range(len(ldf.keys()))]
+    total_norm = np.linalg.norm(group_1norms, ord=1)
+    return group_1norms/total_norm

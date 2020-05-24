@@ -4,6 +4,10 @@ import numpy as np
 from scipy import sparse
 from scipy.sparse.linalg import eigsh
 
+from itertools import islice
+from multiprocessing import Pool
+from functools import reduce
+
 row = np.array([0, 1])
 col = np.array([0, 1])
 data = np.array([1+0j, 1+0j])
@@ -23,16 +27,38 @@ def to_matrix(pauli_string):
     return mat
 
 
-def matrix(pauli_rep):
-    n = pauli_rep.num_qubits
+def matrix(dic):
+    n = len(next(iter(dic.keys())))  # num_qubits
     mat = sparse.csr_matrix((2**n, 2**n), dtype=np.complex128)
-    for pauli_string, coefficient in pauli_rep.dic.items():
+    for pauli_string, coefficient in dic.items():
         mat += coefficient * to_matrix(pauli_string)
     return mat
 
 
-def ground(pauli_rep):
-    mat = matrix(pauli_rep)
+def _chunks(dic, size):
+    it = iter(dic)
+    for i in range(0, len(dic), size):
+        yield {k: dic[k] for k in islice(it, size)}
+
+
+def _size(dic, num_cores):
+    return int(len(dic)/num_cores)+1
+
+
+def matrix_multithread(dic, num_cores=15):
+    size = _size(dic, num_cores)
+    chunks = _chunks(dic, size)
+    p = Pool(processes=num_cores)
+    mats = p.map(matrix, chunks)
+    mat = reduce(lambda A, B: A+B, mats)
+    return mat
+
+
+def ground(pauli_rep, multithread=False):
+    if multithread is False:
+        mat = matrix(pauli_rep.dic)
+    else:
+        mat = matrix_multithread(pauli_rep.dic)
     evals, evecs = eigsh(mat, which='SA')
     # SA looks for algebraically small evalues
     index = np.argmin(evals)
@@ -43,9 +69,10 @@ def energy(pauli_rep, state, tol=1e-6):
     '''
     Directly calculate energy by tracing state over Pauli kronecker product.
     Return real float.
+    Warning: no multi-threading
     '''
     state_dual = np.conjugate(state)
-    mat = matrix(pauli_rep)
+    mat = matrix(pauli_rep.dic)
     trace = np.dot(state_dual, mat * state)
     assert abs(trace.imag) < tol
     return np.real(trace)

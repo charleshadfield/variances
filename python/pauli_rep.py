@@ -2,6 +2,7 @@ import numpy as np
 
 from sparse import ground
 from variance import variance_local
+from variance_mt import variance_local_multithread
 from var_optimise import optimal_beta
 
 
@@ -35,30 +36,20 @@ class PauliRep():
             probs.append(abs(self.dic[pauli]) / self.one_norm_tf)
         return [paulis, probs]
 
-    def _local_pnorm_sum(self, qubit, pauli, norm):
-        '''
-        For given qubit, given pauli, return p-norm weighted sum over coefficients
-        corresponding to pstring for which pstring[qubit]=pauli.
+    def energy_tf(self, energy):
+        return energy - self.iden_coef
 
-        attn: qiskit ordering
-        '''
-        assert norm in [1, 2, 'infinity']
-        assert pauli in ['X', 'Y', 'Z']
-        running_pnorm_sum = 0.0
+    def ground(self, multithread=False):
+        return ground(self, multithread)
 
-        for pstring in self.dic:
-            # qiskit ordering
-            if pstring[-(qubit+1)] == pauli:
-                coefficient = self.dic[pstring]
-                if norm in [1, 2]:
-                    running_pnorm_sum += np.abs(coefficient)**norm
-                else:
-                    running_pnorm_sum = max(running_pnorm_sum, abs(coefficient))
+    def variance_local(self, energy, state, β, multithread=False):
+        if multithread is False:
+            return variance_local(self, energy, state, β)
+        else:
+            return variance_local_multithread(self, energy, state, β)
 
-        if norm == 2:
-            running_pnorm_sum = np.sqrt(running_pnorm_sum)
-
-        return running_pnorm_sum
+    def variance_ell_1(self, energy):
+        return (self.one_norm_tf)**2 - (self.energy_tf(energy))**2
 
     def local_dists_uniform(self):
         dic = {}
@@ -88,14 +79,27 @@ class PauliRep():
             dic[qubit] = [x / one_norm for x in pnorm_sums]
         return dic
 
-    def energy_tf(self, energy):
-        return energy - self.iden_coef
+    def _local_pnorm_sum(self, qubit, pauli, norm):
+        '''
+        For given qubit, given pauli, return p-norm weighted sum over coefficients
+        corresponding to pstring for which pstring[qubit]=pauli.
 
-    def ground(self):
-        return ground(self)
+        attn: qiskit ordering
+        '''
+        assert norm in [1, 2, 'infinity']
+        assert pauli in ['X', 'Y', 'Z']
+        running_pnorm_sum = 0.0
 
-    def variance_local(self, energy, state, β):
-        return variance_local(self, energy, state, β)
+        for pstring in self.dic:
+            # qiskit ordering
+            if pstring[-(qubit+1)] == pauli:
+                coefficient = self.dic[pstring]
+                if norm in [1, 2]:
+                    running_pnorm_sum += np.abs(coefficient)**norm
+                else:
+                    running_pnorm_sum = max(running_pnorm_sum, abs(coefficient))
 
-    def variance_ell_1(self, energy):
-        return (self.one_norm_tf)**2 - (self.energy_tf(energy))**2
+        if norm == 2:
+            running_pnorm_sum = np.sqrt(running_pnorm_sum)
+
+        return running_pnorm_sum

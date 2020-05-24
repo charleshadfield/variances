@@ -106,11 +106,11 @@ def variance_ldf(ldf, state, kappa, energy_tf):
 
 
 def kappa_uniform(ldf):
-    return [1/len(ldf.keys())]*len(ldf.keys())
+    return [1/len(ldf)]*len(ldf)
 
 
 def kappa_1norm(ldf):
     group_1norms = [np.linalg.norm(list(ldf[group].values()), ord=1)
-                    for group in range(len(ldf.keys()))]
+                    for group in range(len(ldf))]
     total_norm = np.linalg.norm(group_1norms, ord=1)
     return group_1norms/total_norm

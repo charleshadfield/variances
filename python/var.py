@@ -1,3 +1,5 @@
+# Calculate variances for Pauli bases algos, and Largest Degree First algos
+
 import numpy as np
 
 # from sparse import to_matrix
@@ -55,23 +57,14 @@ def pauli_multiply_string(Q, R):
 def variance_local(pauli_rep, energy, state, β):
     var = 0.0
 
-    for Q, alphaQ in pauli_rep.dic.items():
-        if Q == 'I' * pauli_rep.num_qubits:
-            continue
-        for R, alphaR in pauli_rep.dic.items():
-            if R == 'I' * pauli_rep.num_qubits:
-                continue
+    for Q, alphaQ in pauli_rep.dic_tf.items():
+        for R, alphaR in pauli_rep.dic_tf.items():
             f = f_string(Q, R, β)
             if f == 0.0:
                 continue
             # else, need to calculate < state | PQ | state >
             QR = pauli_multiply_string(Q, R)
 
-            # old way:
-            # QRmat = to_matrix(QR)
-            # tr_rho_QR = np.dot(np.conjugate(state), QRmat * state).real
-
-            # new way:
             tr_rho_QR = np.dot(np.conjugate(state), pauli_kron_state_product(QR, state)).real
 
             var += f * alphaQ * alphaR * tr_rho_QR

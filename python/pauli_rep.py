@@ -1,9 +1,9 @@
 import numpy as np
 
 from sparse import ground
-from variance import variance_local
-from variance_mt import variance_local_multithread
-from var_optimise import optimal_beta
+from var import variance_local
+from var_mt import variance_local_multithread
+from var_opt import find_optimal_beta
 
 
 class PauliRep():
@@ -12,6 +12,7 @@ class PauliRep():
         self.dic = dic
         self.num_qubits = self.num_qubits()
         self.iden_coef = self.iden_coef()
+        self.dic_tf = self._build_dic_tf()
         self.one_norm_tf = sum(abs(self.dic[p]) for p in self.dic) - abs(self.iden_coef)
 
     def num_qubits(self):
@@ -25,13 +26,20 @@ class PauliRep():
             coef = self.dic[iden]
         return coef
 
+    def _build_dic_tf(self):
+        dic_tf = self.dic.copy()
+        iden = 'I' * self.num_qubits
+        if iden in dic_tf.keys():
+            dic_tf.pop(iden)
+        return dic_tf
+
     def one_norm_probs_tf(self):
         paulis = []
         probs = []
-        for pauli in self.dic:
+        for pauli in self.dic_tf:
             # don't include identity
-            if pauli == 'I' * self.num_qubits:
-                continue
+            # if pauli == 'I' * self.num_qubits:
+            #     continue
             paulis.append(pauli)
             probs.append(abs(self.dic[pauli]) / self.one_norm_tf)
         return [paulis, probs]
@@ -57,10 +65,11 @@ class PauliRep():
             dic[i] = [1/3, 1/3, 1/3]
         return dic
 
-    def local_dists_optimal(self):
+    def local_dists_optimal(self, diagonal_or_mixed, bitstring_HF=None):
         """Find optimal probabilities beta_{i,P} and return as dictionary
+
         attn: qiskit ordering"""
-        return optimal_beta(self)
+        return find_optimal_beta(self.dic_tf, self.num_qubits, diagonal_or_mixed, bitstring_HF)
 
     def local_dists_pnorm(self, norm):
         '''

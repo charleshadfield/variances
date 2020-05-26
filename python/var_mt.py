@@ -1,7 +1,10 @@
+# multithreading hack for calculating variance_local
+# code copy_and_pasted from var.py
+
 import numpy as np
 
 from sparse import pauli_kron_state_product
-from variance import f_string, pauli_multiply_string
+from var import f_string, pauli_multiply_string
 
 from itertools import islice
 from multiprocessing import Pool
@@ -12,6 +15,7 @@ def variance_two_dics(argument):  # dic1, dic2, state, β):
     """
     subroutine for parallel computing
     does not compute trace-free component
+    Warning assume that dic1, dic2 are trace-free
     """
     dic1 = argument['dic1']
     dic2 = argument['dic2']
@@ -38,23 +42,23 @@ def variance_two_dics(argument):  # dic1, dic2, state, β):
     return var
 
 
-def _chunks(dic, size):
-    it = iter(dic)
-    for i in range(0, len(dic), size):
-        yield {k: dic[k] for k in islice(it, size)}
+def _chunks(dic_tf, size):
+    it = iter(dic_tf)
+    for i in range(0, len(dic_tf), size):
+        yield {k: dic_tf[k] for k in islice(it, size)}
 
 
-def _size(dic, num_cores):
-    return int(len(dic)/num_cores)+1
+def _size(dic_tf, num_cores):
+    return int(len(dic_tf)/num_cores)+1
 
 
 def variance_local_multithread(pauli_rep, energy, state, β, num_cores=15):
-    size = _size(pauli_rep.dic, num_cores)
-    chunks = _chunks(pauli_rep.dic, size)
+    size = _size(pauli_rep.dic_tf, num_cores)
+    chunks = _chunks(pauli_rep.dic_tf, size)
 
     arguments = []
     for chunk in chunks:
-        argument = {'dic1': chunk, 'dic2': pauli_rep.dic, 'state': state, 'beta': β}
+        argument = {'dic1': chunk, 'dic2': pauli_rep.dic_tf, 'state': state, 'beta': β}
         arguments.append(argument)
 
     p = Pool(processes=num_cores)

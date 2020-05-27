@@ -3,7 +3,8 @@ import numpy as np
 from sparse import ground
 from var import variance_local
 from var_mt import variance_local_multithread
-from var_opt import find_optimal_beta
+from var_opt_scipy import find_optimal_beta_scipy
+from var_opt_lagrange import find_optimal_beta_lagrange
 
 
 class PauliRep():
@@ -65,11 +66,20 @@ class PauliRep():
             dic[i] = [1/3, 1/3, 1/3]
         return dic
 
-    def local_dists_optimal(self, diagonal_or_mixed, bitstring_HF=None):
+    def local_dists_optimal(self, objective, method, β_initial=None, bitstring_HF=None):
         """Find optimal probabilities beta_{i,P} and return as dictionary
-
         attn: qiskit ordering"""
-        return find_optimal_beta(self.dic_tf, self.num_qubits, diagonal_or_mixed, bitstring_HF)
+        assert objective in ['diagonal', 'mixed']
+        assert method in ['scipy', 'lagrange']
+        if method == 'scipy':
+            return find_optimal_beta_scipy(self.dic_tf, self.num_qubits, objective,
+                                           β_initial=β_initial, bitstring_HF=bitstring_HF)
+        else:
+            return find_optimal_beta_lagrange(self.dic_tf, self.num_qubits, objective,
+                                              tol=1.0e-5, iter=1000,  # these could be lifted to optional arguments
+                                              β_initial=None, bitstring_HF=None)
+
+    # Code below is old. And also inefficient! Use np.linalg.norm
 
     def local_dists_pnorm(self, norm):
         '''

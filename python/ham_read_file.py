@@ -1,8 +1,8 @@
 import itertools
 
 
-def read_encoding_return_dict(file):
-    with open(file, 'r') as f:
+def read_encoding_return_dict(path):
+    with open(path, 'r') as f:
         first_line = f.readline()
         first_character = first_line[0]
         if first_character == '{':
@@ -12,7 +12,7 @@ def read_encoding_return_dict(file):
 
     if format == 'dictionary':
         dic = {}
-        with open(file, 'r') as f:
+        with open(path, 'r') as f:
             dict1 = eval(f.read())
             list2 = dict1['paulis']
             for item in list2:
@@ -23,7 +23,7 @@ def read_encoding_return_dict(file):
 
     if format == 'list':
         dic = {}
-        with open(file, 'r') as f:
+        with open(path, 'r') as f:
             for line1, line2 in itertools.zip_longest(*[f]*2):
                 pauli_string = line1[:-1]
                 coefficient = float(line2[1:-5])
@@ -33,7 +33,7 @@ def read_encoding_return_dict(file):
     pass
 
 
-def read_ldf_return_dict(file, num_qubits):
+def read_ldf_return_dict(path, num_qubits):
     """
     Build dictionary of PauliRep styled dictionaries over groupings obtained from ldf algorithm.
     LDF algo has already been applied, and file is in same folder as encoding.
@@ -41,7 +41,7 @@ def read_ldf_return_dict(file, num_qubits):
     """
     groups = {}
     group_number = -1
-    with open(file, 'r') as f:
+    with open(path, 'r') as f:
         for line_number, line in enumerate(f):
             if line[0:4] == '0.0,':
                 group_number += 1
@@ -58,3 +58,12 @@ def read_ldf_return_dict(file, num_qubits):
                 else:
                     groups[group_number][pauli] = coefficient
     return groups
+
+
+def read_bitstring_HF(path, encoding):
+    with open(path, 'r') as f:
+        for line in f:
+            if line.strip() == encoding:
+                break
+        bitstring = next(f)
+    return bitstring.strip()

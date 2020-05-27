@@ -1,5 +1,5 @@
 from pauli_rep import PauliRep
-from ham_read_file import read_encoding_return_dict, read_ldf_return_dict
+from ham_read_file import read_encoding_return_dict, read_ldf_return_dict, read_bitstring_HF
 
 
 class Hamiltonian():
@@ -12,14 +12,18 @@ class Hamiltonian():
         self.num_qubits = self.pauli_rep.num_qubits
 
     def path(self):
-        path = 'Hamiltonians/{0}/{1}.txt'.format(self.folder, self.encoding)
+        path = '../Hamiltonians/{0}/{1}.txt'.format(self.folder, self.encoding)
         return path
+
+    def read_bitstring_HF(self):
+        path = '../Hamiltonians/{0}/hartree_fock_bitstrings.txt'.format(self.folder)
+        return read_bitstring_HF(path, self.encoding)
 
     def _pauli_rep_dic(self):
         return read_encoding_return_dict(self.path)
 
     def ldf(self):
-        path = 'Hamiltonians/{0}/{1}_grouped.txt'.format(self.folder, self.encoding)
+        path = '../Hamiltonians/{0}/{1}_grouped.txt'.format(self.folder, self.encoding)
         return read_ldf_return_dict(path, self.num_qubits)
 
 
@@ -53,9 +57,9 @@ class HamiltonianSmall():
         else:
             distance_cleaned_up = self.distance
 
-        path = 'Hamiltonians/small/{0}/Potential/PESMap{1}atdistance{2}.txt'.format(self.molecule,
-                                                                                    map_number,
-                                                                                    distance_cleaned_up)
+        path = '../Hamiltonians/small/{0}/Potential/PESMap{1}atdistance{2}.txt'.format(self.molecule,
+                                                                                       map_number,
+                                                                                       distance_cleaned_up)
         return path
 
     def _pauli_rep_dic(self):

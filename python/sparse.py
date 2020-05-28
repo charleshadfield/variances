@@ -45,7 +45,7 @@ def _size(dic, num_cores):
     return int(len(dic)/num_cores)+1
 
 
-def matrix_multithread(dic, num_cores=15):
+def matrix_multithread(dic, num_cores=2):
     size = _size(dic, num_cores)
     chunks = _chunks(dic, size)
     p = Pool(processes=num_cores)
@@ -58,7 +58,7 @@ def ground(pauli_rep, multithread=False):
     if multithread is False:
         mat = matrix(pauli_rep.dic)
     else:
-        mat = matrix_multithread(pauli_rep.dic)
+        mat = matrix_multithread(pauli_rep.dic, 4)
     evals, evecs = eigsh(mat, which='SA')
     # SA looks for algebraically small evalues
     index = np.argmin(evals)

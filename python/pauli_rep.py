@@ -75,9 +75,15 @@ class PauliRep():
             return find_optimal_beta_scipy(self.dic_tf, self.num_qubits, objective,
                                            β_initial=β_initial, bitstring_HF=bitstring_HF)
         else:
-            return find_optimal_beta_lagrange(self.dic_tf, self.num_qubits, objective,
-                                              tol=1.0e-5, iter=1000,  # these could be lifted to optional arguments
-                                              β_initial=None, bitstring_HF=None)
+            #print("DIC_TF:", self.dic_tf)
+            if objective == "diagonal":
+                return find_optimal_beta_lagrange(self.dic_tf, self.num_qubits, objective,
+                                                  tol=1.0e-5, iter=10000,
+                                                  β_initial=None, bitstring_HF=bitstring_HF)
+            else:
+                return find_optimal_beta_lagrange(self.dic_tf, self.num_qubits, "mixed",
+                                                  tol=1.0e-5, iter=10000, 
+                                                  β_initial=β_initial, bitstring_HF=bitstring_HF)
 
     # Code below is old. And also inefficient! Use np.linalg.norm
 

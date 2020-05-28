@@ -52,7 +52,7 @@ def _size(dic_tf, num_cores):
     return int(len(dic_tf)/num_cores)+1
 
 
-def variance_local_multithread(pauli_rep, energy, state, β, num_cores=15):
+def variance_local_multithread(pauli_rep, energy, state, β, num_cores=2):
     size = _size(pauli_rep.dic_tf, num_cores)
     chunks = _chunks(pauli_rep.dic_tf, size)
 

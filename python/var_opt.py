@@ -78,11 +78,11 @@ def calculate_product_term_mixed(Q, R, bitstring_HF, β):
             qubit = (len(Q)-1)-i  # qiskit ordering
             index = pauli_to_index[Q[i]]
             b = β[qubit][index]
-            if b == 0.0:
-                # this cannot be allowed, as convergence in expectation won't work
-                return float('inf')
-            else:
-                prod *= b**(-1)
+            # if b == 0.0:
+            # this cannot be allowed, as convergence in expectation won't work
+            #    return float('inf')
+            # else:
+            prod *= b**(-1)
         if Q[i] != R[i]:
             # then Q[i], R[i] are of the form I,Z or Z,I
             bit = int(bitstring_HF[i])

@@ -48,14 +48,14 @@ class PauliRep():
     def energy_tf(self, energy):
         return energy - self.iden_coef
 
-    def ground(self, multithread=False):
-        return ground(self, multithread)
+    def ground(self, multithread=False, num_cores=15):
+        return ground(self, multithread=multithread, num_cores=num_cores)
 
-    def variance_local(self, energy, state, β, multithread=False):
+    def variance_local(self, energy, state, β, multithread=False, num_cores=15):
         if multithread is False:
             return variance_local(self, energy, state, β)
         else:
-            return variance_local_multithread(self, energy, state, β)
+            return variance_local_multithread(self, energy, state, β, num_cores=num_cores)
 
     def variance_ell_1(self, energy):
         return (self.one_norm_tf)**2 - (self.energy_tf(energy))**2
@@ -75,9 +75,10 @@ class PauliRep():
             return find_optimal_beta_scipy(self.dic_tf, self.num_qubits, objective,
                                            β_initial=β_initial, bitstring_HF=bitstring_HF)
         else:
+            # method == 'lagrange'
             return find_optimal_beta_lagrange(self.dic_tf, self.num_qubits, objective,
-                                              tol=1.0e-5, iter=1000,  # these could be lifted to optional arguments
-                                              β_initial=None, bitstring_HF=None)
+                                              tol=1.0e-5, iter=10000,
+                                              β_initial=β_initial, bitstring_HF=bitstring_HF)
 
     # Code below is old. And also inefficient! Use np.linalg.norm
 

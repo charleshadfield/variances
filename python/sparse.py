@@ -54,11 +54,11 @@ def matrix_multithread(dic, num_cores=15):
     return mat
 
 
-def ground(pauli_rep, multithread=False):
+def ground(pauli_rep, multithread=False, num_cores=15):
     if multithread is False:
         mat = matrix(pauli_rep.dic)
     else:
-        mat = matrix_multithread(pauli_rep.dic)
+        mat = matrix_multithread(pauli_rep.dic, num_cores=num_cores)
     evals, evecs = eigsh(mat, which='SA')
     # SA looks for algebraically small evalues
     index = np.argmin(evals)

@@ -105,15 +105,18 @@ def mixed_update_betas(dic_tf, num_qubits, influential_pairs, bit_HF, β_old=Non
     if β_old is None:  # initialize with random uniform
         β_old = {}
         for qubit in range(num_qubits):
-            β_old[qubit] = [1./3 for _ in range(3)]
+            β_old[qubit] = np.array([1./3 for _ in range(3)])
     β_new = {}
     for qubit in range(num_qubits):
         β_new[qubit] = []
-        denominator = None
+        denominator = 1.0 #we do not compute the denominator
         for index, pauli in enumerate(("X", "Y", "Z")):
             lagrange_rest, denominator = mixed_lagrange_restriction(qubit, pauli, dic_tf, influential_pairs, bit_HF, β_old, denominator)
-            update = (1. - weight) * β_old[qubit][index] + weight * lagrange_rest
-            β_new[qubit].append(update)
+            β_new[qubit].append(lagrange_rest)
+        β_new[qubit] = np.array(β_new[qubit])/np.sum(β_new[qubit])
+        β_new[qubit] = (1. - weight) * np.array(β_old[qubit]) + weight * β_new[qubit]
+            #update = (1. - weight) * β_old[qubit][index] + weight * lagrange_rest
+            #β_new[qubit].append(update)
     return β_new, distance(β_new, β_old)
 
 
@@ -159,13 +162,16 @@ def update_betas(dic_tf, num_qubits, β_old=None, weight=0.1):
     if β_old is None:  # initialize with random uniform
         β_old = {}
         for qubit in range(num_qubits):
-            β_old[qubit] = [1./3 for _ in range(3)]
+            β_old[qubit] = np.array([1./3 for _ in range(3)])
     β_new = {}
     for qubit in range(num_qubits):
         β_new[qubit] = []
-        denominator = None
+        denominator = 1.0 # we do not compute the denominator explicitly
         for index, pauli in enumerate(("X", "Y", "Z")):
             lagrange_rest, denominator = lagrange_restriction(qubit, pauli, dic_tf, β_old, denominator)
-            update = (1. - weight) * β_old[qubit][index] + weight * lagrange_rest
-            β_new[qubit].append(update)
+            β_new[qubit].append(lagrange_rest)
+        β_new[qubit] = np.array(β_new[qubit])/np.sum(β_new[qubit])
+        β_new[qubit] = (1. - weight) * np.array(β_old[qubit]) + weight * β_new[qubit]
+            #update = (1. - weight) * β_old[qubit][index] + weight * lagrange_rest
+            #β_new[qubit].append(update)
     return β_new, distance(β_new, β_old)

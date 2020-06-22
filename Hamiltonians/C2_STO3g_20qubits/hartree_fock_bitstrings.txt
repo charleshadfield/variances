@@ -2,7 +2,7 @@ Hartree-Fock bitstrings
 
 ===
 jw
-
+11111100001111110000
 ===
 parity
 
